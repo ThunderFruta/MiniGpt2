@@ -1,71 +1,67 @@
-# MiniGpt2 LoRA RAG
+# Clean LLM Evaluation Harness
 
-This repository is an old experimental snapshot of a MiniGpt2 LoRA and RAG project. It is preserved as research/prototype code, not as a polished package or production-ready application.
+This repository now treats the old MiniGpt2 files as historical prototype evidence only. The active project is a reproducible inference, evaluation, and systems benchmarking harness for comparing LLMs across API and local OpenAI-compatible endpoints.
 
-The project combines staged LoRA training scripts, merge scripts, inference helpers, a simple RAG pipeline, and Flask app entrypoints for local or tunneled serving. The original experiment had instability and memory constraints, and generated artifacts are intentionally excluded from this public repo.
+This is not a training project. It does not retrain MiniGpt2, recover old checkpoints, rebuild LoRA adapters, or verify old training runs.
 
-## What Is Included
+## What This Answers
 
-- `Predict.py` and `MassPredict.py`: inference helpers for loading merged bases, optional LoRA adapters, and RAG-assisted prompting.
-- `Reset&Train.py`: controller script for the staged LoRA training and merge pipeline.
-- `TrainStages/`: stage-specific LoRA training scripts.
-- `MergeStages/`: scripts for merging staged adapters into the next base.
-- `Rag/Pipelines/`: document ingest, indexing, retrieval, routing, reranking, prompt packing, and post-check helpers.
-- `Rag/Config/` and `Rag/Prompts/`: lightweight configuration and prompt templates.
-- `Apps&Cloudflare/`: Flask app entrypoints for local and Cloudflare-tunneled use.
+- Which model performs better on the same tasks?
+- Which model is faster?
+- Which model uses fewer tokens?
+- Which model is cheaper per correct answer?
+- What can API access provide or not provide?
+- What can the RTX 4080 handle through a local endpoint?
+- What does not fit or perform well locally?
+- Whether cloud GPU testing is justified by benchmark data.
 
-## What Is Not Included
+## Quickstart
 
-The public repo intentionally ignores generated or machine-local files:
+Run an evaluation with an OpenAI-compatible model config:
 
-- `.venv/`
-- `Rag/Cache/`
-- `AdapterBackups/`
-- `LoraAdapters/`
-- `Rag/Indexes/`
-- `Rag/Docs/`
-- `Rag/Memory/`
-- model weight and checkpoint files such as `*.safetensors`, `*.bin`, `*.pt`, `*.pth`, and `*.ckpt`
-
-That means the code will not run out of the box without recreating or restoring the required models, adapters, datasets, and RAG documents.
-
-## Expected Shape
-
-The older local working tree expected directories like:
-
-```text
-LoraAdapters/
-Rag/Docs/
-Rag/Indexes/
-Rag/Cache/
-Voices/
-Prediction/
+```bash
+python -m llm_eval run --tasks data/eval_tasks.jsonl --models config/models.example.json --out runs/example
 ```
 
-Some scripts also assume local model paths such as `LoraAdapters/merged_stage3` and `LoraAdapters/stage4-lora`. Those paths are excluded here and need to be recreated or changed before running inference.
+If this machine does not provide a `python` executable, use `python3 -m llm_eval` with the same arguments.
 
-## Rough Workflow
+The example config includes a DeepSeek-style API profile and a local OpenAI-compatible endpoint profile. Set the configured API key environment variable only when using a remote API profile. Local endpoints can use `api_key_env: null`.
 
-1. Prepare datasets under `Voices/`.
-2. Train missing or new LoRA stages with:
+The harness writes:
 
-   ```bash
-   python "Reset&Train.py" --dry-run
-   python "Reset&Train.py" --action missing
-   ```
+- `raw_outputs.jsonl`
+- `judged_results.jsonl`
+- `metrics.csv`
+- `summary.md`
 
-3. Rebuild RAG indexes after adding documents:
+## Metrics
 
-   ```bash
-   python UpdateRag.py
-   ```
+`metrics.csv` contains:
 
-4. Run inference once model and adapter paths exist:
+```text
+model_name,task_id,task_type,prompt_tokens,completion_tokens,total_tokens,latency_sec,tokens_per_second,expected_answer,model_output,correct,error,cost_estimate
+```
 
-   ```bash
-   python Predict.py
-   ```
+Token counts are recorded when the endpoint returns usage data. Cost estimates come from model config pricing fields, not hardcoded provider prices.
 
-## Notes
+## Scope
 
-This is old prototype code, so expect hardcoded paths, missing dependency declarations, instability, memory constraints, and assumptions from the original local environment. Treat it as a reference snapshot for the LoRA/RAG experiment rather than a clean reusable library.
+In scope:
+
+- API model calls through configurable OpenAI-compatible endpoints.
+- Local model endpoints that expose an OpenAI-compatible `/chat/completions` API.
+- Running the same tasks across multiple models.
+- Recording latency, token counts, tokens per second, accuracy, errors, and cost estimates.
+- Generating CSV metrics and Markdown summaries.
+
+Out of scope:
+
+- Training or retraining.
+- Checkpoint recovery.
+- LoRA adapter restoration.
+- Debugging old training scripts.
+- Hardware purchases without benchmark evidence.
+
+## Legacy Files
+
+Directories such as `TrainStages/`, `MergeStages/`, `LoraAdapters/`, and `AdapterBackups/` are not part of the active harness. They remain in place to preserve historical context, but the new `llm_eval/` package does not import or execute them.

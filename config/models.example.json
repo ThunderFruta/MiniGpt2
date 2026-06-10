@@ -1,0 +1,29 @@
+{
+  "models": [
+    {
+      "name": "deepseek-v4-flash-api",
+      "provider": "openai_compatible",
+      "base_url": "https://api.deepseek.example/v1",
+      "model": "deepseek-v4-flash",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "timeout_sec": 60,
+      "temperature": 0,
+      "max_tokens": 512,
+      "price_per_1k_prompt_tokens": null,
+      "price_per_1k_completion_tokens": null
+    },
+    {
+      "name": "local-openai-compatible",
+      "provider": "openai_compatible",
+      "base_url": "http://127.0.0.1:8000/v1",
+      "model": "local-model",
+      "api_key_env": null,
+      "timeout_sec": 120,
+      "temperature": 0,
+      "max_tokens": 512,
+      "price_per_1k_prompt_tokens": 0,
+      "price_per_1k_completion_tokens": 0
+    }
+  ]
+}
+

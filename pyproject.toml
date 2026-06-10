@@ -1,0 +1,14 @@
+[project]
+name = "clean-llm-eval-harness"
+version = "0.1.0"
+description = "Provider-neutral LLM inference and evaluation harness for benchmarking models."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
